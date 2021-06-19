@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+* Rename the PeripheralREC object for BDMA2 on 7B3, 7B0, 7A3 parts from BDMA to BDMA2
+
 ## [v0.10.0] 2021-07-xx
 
 * **Breaking**: Don't reset peripheral in DMA1/2 `StreamsTuple::new()` method #229
