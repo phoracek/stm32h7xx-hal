@@ -132,40 +132,63 @@ pub use crate::stm32 as device;
 #[cfg(feature = "rt")]
 pub use crate::stm32::interrupt;
 
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod adc;
+#[cfg(not_now)]
 #[cfg(all(feature = "device-selected", feature = "crc"))]
 pub mod crc;
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod dac;
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod delay;
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod dma;
+#[cfg(not_now)]
 #[cfg(all(
     feature = "device-selected",
     feature = "ethernet",
     not(feature = "rm0455")
 ))]
 pub mod ethernet;
+
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod exti;
+
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod flash;
+
+#[cfg(not_now)]
 #[cfg(all(feature = "device-selected", feature = "fmc"))]
 pub mod fmc;
+
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod gpio;
+
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod i2c;
+
+#[cfg(not_now)]
 #[cfg(all(feature = "device-selected", feature = "ltdc"))]
 pub mod ltdc;
+
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod prelude;
+
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod pwm;
-#[cfg(feature = "device-selected")]
-pub mod pwr;
+
+
+#[cfg(not_now)]
 #[cfg(feature = "device-selected")]
 pub mod qei;
 #[cfg(all(
@@ -174,27 +197,56 @@ pub mod qei;
     not(feature = "rm0455")
 ))]
 pub mod qspi;
+
+
+#[cfg(not_now)]
+#[cfg(feature = "device-selected")]
+pub mod rng;
+
+#[cfg(not_now)]
+#[cfg(all(feature = "device-selected", feature = "rtc"))]
+pub mod rtc;
+
+#[cfg(not_now)]
+#[cfg(feature = "device-selected")]
+pub mod sai;
+
+#[cfg(not_now)]
+#[cfg(all(feature = "device-selected", feature = "sdmmc"))]
+pub mod sdmmc;
+
+#[cfg(not_now)]
+#[cfg(feature = "device-selected")]
+pub mod serial;
+
+#[cfg(not_now)]
+#[cfg(feature = "device-selected")]
+pub mod signature;
+
+#[cfg(not_now)]
+#[cfg(feature = "device-selected")]
+#[cfg(not_now)]
+pub mod spi;
+
+#[cfg(feature = "device-selected")]
+#[cfg(not_now)]
+pub mod timer;
+
+#[cfg(not_now)]
+#[cfg(all(feature = "device-selected", feature = "usb_hs"))]
+pub mod usb_hs;
+
+#[cfg(not_now)]
+#[cfg(feature = "device-selected")]
+pub mod watchdog;
+
+
+
+
+
 #[cfg(feature = "device-selected")]
 pub mod rcc;
 #[cfg(feature = "device-selected")]
-pub mod rng;
-#[cfg(all(feature = "device-selected", feature = "rtc"))]
-pub mod rtc;
-#[cfg(feature = "device-selected")]
-pub mod sai;
-#[cfg(all(feature = "device-selected", feature = "sdmmc"))]
-pub mod sdmmc;
-#[cfg(feature = "device-selected")]
-pub mod serial;
-#[cfg(feature = "device-selected")]
-pub mod signature;
-#[cfg(feature = "device-selected")]
-pub mod spi;
-#[cfg(feature = "device-selected")]
 pub mod time;
 #[cfg(feature = "device-selected")]
-pub mod timer;
-#[cfg(all(feature = "device-selected", feature = "usb_hs"))]
-pub mod usb_hs;
-#[cfg(feature = "device-selected")]
-pub mod watchdog;
+pub mod pwr;
