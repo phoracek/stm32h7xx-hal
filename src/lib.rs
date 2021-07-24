@@ -240,6 +240,9 @@ pub mod usb_hs;
 #[cfg(feature = "device-selected")]
 pub mod watchdog;
 
+#[cfg(not_now)]
+#[cfg(feature = "device-selected")]
+pub mod pwr;
 
 
 
@@ -248,5 +251,3 @@ pub mod watchdog;
 pub mod rcc;
 #[cfg(feature = "device-selected")]
 pub mod time;
-#[cfg(feature = "device-selected")]
-pub mod pwr;
