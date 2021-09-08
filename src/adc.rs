@@ -7,6 +7,9 @@ use crate::hal::adc::{Channel, OneShot};
 use crate::hal::blocking::delay::DelayUs;
 
 use core::marker::PhantomData;
+use core::convert::Infallible;
+
+use nb::block;
 
 #[cfg(feature = "rm0455")]
 use crate::stm32::ADC12_COMMON;
@@ -69,6 +72,7 @@ pub struct Adc<ADC, ED> {
     sample_time: AdcSampleTime,
     resolution: Resolution,
     lshift: AdcLshift,
+    selected_channel: Option<u8>,
     _enabled: PhantomData<ED>,
 }
 
@@ -467,6 +471,7 @@ macro_rules! adc_hal {
                         sample_time: AdcSampleTime::default(),
                         resolution: Resolution::SIXTEENBIT,
                         lshift: AdcLshift::default(),
+                        selected_channel: None,
                         _enabled: PhantomData,
                     }
                 }
@@ -568,6 +573,7 @@ macro_rules! adc_hal {
                         sample_time: self.sample_time,
                         resolution: self.resolution,
                         lshift: self.lshift,
+                        selected_channel: self.selected_channel,
                         _enabled: PhantomData,
                     }
                 }
@@ -610,10 +616,19 @@ macro_rules! adc_hal {
                     }
                 }
 
+                /// Start conversion
+                ///
+                /// This method will start reading sequence on the given pin.
+                /// The value can be then read through the `read_sample` method.
                 // Refer to RM0433 Rev 6 - Chapter 24.4.16
-                fn convert(&mut self, chan: u8) -> u32 {
-                    assert!(chan <= 19);
+                pub fn start_conversion<PIN>(&mut self, _pin: &mut PIN)
+                    where PIN: Channel<$ADC, ID = u8>,
+                {
                     self.check_conversion_conditions();
+
+                    let chan = PIN::channel();
+                    assert!(chan <= 19);
+                    self.selected_channel = Some(chan);
 
                     // Set resolution
                     self.rb.cfgr.modify(|_, w| unsafe { w.res().bits(self.get_resolution().into()) });
@@ -631,16 +646,29 @@ macro_rules! adc_hal {
 
                     // Perform conversion
                     self.rb.cr.modify(|_, w| w.adstart().set_bit());
+                }
 
-                    // Wait until conversion finished
-                    while self.rb.isr.read().eoc().bit_is_clear() {}
+                /// Read sample
+                ///
+                /// This method will either return converted value or
+                /// `nb::Error::WouldBlock` in case the conversion is still
+                /// progressing.
+                // Refer to RM0433 Rev 6 - Chapter 24.4.16
+                pub fn read_sample(&mut self) -> nb::Result<u32, Infallible> {
+                    let chan = self.selected_channel.expect("No channel is selected, make sure to start_conversion first");
+
+                    // Check if the conversion is finished
+                    if self.rb.isr.read().eoc().bit_is_clear() {
+                        return Err(nb::Error::WouldBlock);
+                    }
 
                     // Disable preselection of this channel, refer to RM0433 Rev 6 - Chapter 24.4.12
                     self.rb.pcsel.modify(|r, w| unsafe { w.pcsel().bits(r.pcsel().bits() & !(1 << chan)) });
+                    self.selected_channel = None;
 
                     // Retrieve result
                     let result = self.rb.dr.read().bits();
-                    result
+                    nb::Result::Ok(result)
                 }
 
                 fn check_conversion_conditions(&self) {
@@ -678,6 +706,7 @@ macro_rules! adc_hal {
                         sample_time: self.sample_time,
                         resolution: self.resolution,
                         lshift: self.lshift,
+                        selected_channel: None,
                         _enabled: PhantomData,
                     }
                 }
@@ -811,8 +840,9 @@ macro_rules! adc_hal {
             {
                 type Error = ();
 
-                fn read(&mut self, _pin: &mut PIN) -> nb::Result<WORD, Self::Error> {
-                    let res = self.convert(PIN::channel());
+                fn read(&mut self, pin: &mut PIN) -> nb::Result<WORD, Self::Error> {
+                    self.start_conversion(pin);
+                    let res = block!(self.read_sample()).unwrap();
                     Ok(res.into())
                 }
             }
